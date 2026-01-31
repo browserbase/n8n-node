@@ -145,16 +145,28 @@ export class Browserbase implements INodeType {
 				},
 				options: [
 					{
+						name: 'Claude Opus 4.5 (Anthropic)',
+						value: 'anthropic/claude-opus-4-5',
+					},
+					{
 						name: 'Claude Sonnet 4.5 (Anthropic)',
 						value: 'anthropic/claude-sonnet-4-5-20250929',
 					},
 					{
-						name: 'Gemini 2.5 Flash (Google) - Recommended',
+						name: 'Gemini 2.5 Flash (Google)',
 						value: 'google/gemini-2.5-flash',
 					},
 					{
 						name: 'Gemini 2.5 Pro (Google)',
 						value: 'google/gemini-2.5-pro',
+					},
+					{
+						name: 'Gemini 3 Flash (Google)',
+						value: 'google/gemini-3-flash-preview',
+					},
+					{
+						name: 'Gemini 3 Pro (Google)',
+						value: 'google/gemini-3-pro-preview',
 					},
 					{
 						name: 'GPT-4o (OpenAI)',
@@ -215,12 +227,8 @@ export class Browserbase implements INodeType {
 				},
 				options: [
 					{
-						name: 'Claude Haiku 4.5 (Anthropic) - Fastest',
+						name: 'Claude Haiku 4.5 (Anthropic)',
 						value: 'anthropic/claude-haiku-4-5-20251001',
-					},
-					{
-						name: 'Claude Sonnet 4 (Anthropic)',
-						value: 'anthropic/claude-sonnet-4-20250514',
 					},
 					{
 						name: 'Claude Sonnet 4.5 (Anthropic)',
@@ -231,7 +239,7 @@ export class Browserbase implements INodeType {
 						value: 'openai/computer-use-preview',
 					},
 					{
-						name: 'Gemini 2.5 CUA (Google) - Recommended',
+						name: 'Gemini 2.5 CUA (Google)',
 						value: 'google/gemini-2.5-computer-use-preview-10-2025',
 					},
 				],
@@ -252,16 +260,32 @@ export class Browserbase implements INodeType {
 				},
 				options: [
 					{
+						name: 'Claude Opus 4.5 (Anthropic)',
+						value: 'anthropic/claude-opus-4-5',
+					},
+					{
 						name: 'Claude Sonnet 4.5 (Anthropic)',
 						value: 'anthropic/claude-sonnet-4-5-20250929',
 					},
 					{
-						name: 'Gemini 2.5 Flash (Google) - Fast & Cheap',
+						name: 'Gemini 2.5 Flash (Google)',
 						value: 'google/gemini-2.5-flash',
 					},
 					{
-						name: 'Gemini 2.5 Pro (Google) - Most Capable',
+						name: 'Gemini 2.5 Pro (Google)',
 						value: 'google/gemini-2.5-pro',
+					},
+					{
+						name: 'Gemini 3 Flash (Google)',
+						value: 'google/gemini-3-flash-preview',
+					},
+					{
+						name: 'Gemini 3 Pro (Google)',
+						value: 'google/gemini-3-pro-preview',
+					},
+					{
+						name: 'GPT-4.1 (OpenAI)',
+						value: 'openai/gpt-4.1',
 					},
 					{
 						name: 'GPT-4o (OpenAI)',
@@ -289,8 +313,12 @@ export class Browserbase implements INodeType {
 				},
 				options: [
 					{
-						name: 'Gemini 3 Flash (Google) - Recommended',
+						name: 'Gemini 3 Flash (Google)',
 						value: 'google/gemini-3-flash-preview',
+					},
+					{
+						name: 'Claude Sonnet 4.5 (Anthropic)',
+						value: 'anthropic/claude-sonnet-4-5-20250929',					
 					},
 					{
 						name: 'Claude Sonnet 4 (Anthropic)',
@@ -423,13 +451,13 @@ export class Browserbase implements INodeType {
 						name: 'region',
 						type: 'options',
 						options: [
-							{ name: 'AP South 1', value: 'ap-south-1' },
-							{ name: 'EU West 1', value: 'eu-west-1' },
-							{ name: 'US East 1', value: 'us-east-1' },
-							{ name: 'US West 2', value: 'us-west-2' },
+							{ name: 'US West 2 (Oregon)', value: 'us-west-2' },
+							{ name: 'US East 1 (Virginia)', value: 'us-east-1' },
+							{ name: 'EU Central 1 (Frankfurt)', value: 'eu-central-1' },
+							{ name: 'AP Southeast 1 (Singapore)', value: 'ap-southeast-1' },
 						],
 						default: 'us-west-2',
-						description: 'The region where the browser session will run',
+						description: 'Region where the browser session will run. Available: us-west-2 (Oregon), us-east-1 (Virginia), eu-central-1 (Frankfurt), ap-southeast-1 (Singapore). All sessions are created in us-west-2 by default.',
 					},
 					{
 						displayName: 'Timeout',
