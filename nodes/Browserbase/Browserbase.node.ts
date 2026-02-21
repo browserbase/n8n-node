@@ -388,48 +388,86 @@ export class Browserbase implements INodeType {
 					},
 				},
 				options: [
-					{
-						displayName: 'Advanced Stealth',
-						name: 'advancedStealth',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to enable advanced stealth mode to avoid bot detection',
-					},
-					{
-						displayName: 'Block Ads',
-						name: 'blockAds',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to block ads during browsing',
-					},
-					{
-						displayName: 'Record Session',
-						name: 'recordSession',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to record the browser session for replay',
-					},
-					{
-						displayName: 'Solve Captchas',
-						name: 'solveCaptchas',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to automatically solve captchas encountered during execution',
-					},
-					{
-						displayName: 'Viewport Height',
-						name: 'viewportHeight',
-						type: 'number',
-						default: 711,
-						description: 'Browser viewport height in pixels (711 recommended for CUA)',
-					},
-					{
-						displayName: 'Viewport Width',
-						name: 'viewportWidth',
-						type: 'number',
-						default: 1288,
-						description: 'Browser viewport width in pixels (1288 recommended for CUA)',
-					},
+				{
+					displayName: 'Advanced Stealth',
+					name: 'advancedStealth',
+					type: 'boolean',
+					default: false,
+					description: 'Whether to enable advanced stealth mode to avoid bot detection',
+				},
+				{
+					displayName: 'Block Ads',
+					name: 'blockAds',
+					type: 'boolean',
+					default: true,
+					description: 'Whether to block ads during browsing',
+				},
+				{
+					displayName: 'Captcha Image Selector',
+					name: 'captchaImageSelector',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. #captcha-image',
+					description: 'Custom CSS selector for the captcha image element. Used with Solve Captchas for custom captcha solving.',
+				},
+				{
+					displayName: 'Captcha Input Selector',
+					name: 'captchaInputSelector',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. #captcha-input',
+					description: 'Custom CSS selector for the captcha input element. Used with Solve Captchas for custom captcha solving.',
+				},
+				{
+					displayName: 'Log Session',
+					name: 'logSession',
+					type: 'boolean',
+					default: true,
+					description: 'Whether to enable session logging',
+				},
+				{
+					displayName: 'OS',
+					name: 'os',
+					type: 'options',
+					options: [
+						{ name: 'Default', value: '' },
+						{ name: 'Linux', value: 'linux' },
+						{ name: 'Mac', value: 'mac' },
+						{ name: 'Mobile', value: 'mobile' },
+						{ name: 'Tablet', value: 'tablet' },
+						{ name: 'Windows', value: 'windows' },
+					],
+					default: '',
+					description: 'OS for advanced stealth mode. Controls user agent and browser environment signals.',
+				},
+				{
+					displayName: 'Record Session',
+					name: 'recordSession',
+					type: 'boolean',
+					default: true,
+					description: 'Whether to record the browser session for replay',
+				},
+				{
+					displayName: 'Solve Captchas',
+					name: 'solveCaptchas',
+					type: 'boolean',
+					default: false,
+					description: 'Whether to automatically solve captchas encountered during execution',
+				},
+				{
+					displayName: 'Viewport Height',
+					name: 'viewportHeight',
+					type: 'number',
+					default: 711,
+					description: 'Browser viewport height in pixels (711 recommended for CUA)',
+				},
+				{
+					displayName: 'Viewport Width',
+					name: 'viewportWidth',
+					type: 'number',
+					default: 1288,
+					description: 'Browser viewport width in pixels (1288 recommended for CUA)',
+				},
 				],
 			},
 			// Session Options
@@ -445,35 +483,72 @@ export class Browserbase implements INodeType {
 						operation: ['execute'],
 					},
 				},
-				options: [
-					{
-						displayName: 'Region',
-						name: 'region',
-						type: 'options',
-						options: [
-							{ name: 'US West 2 (Oregon)', value: 'us-west-2' },
-							{ name: 'US East 1 (Virginia)', value: 'us-east-1' },
-							{ name: 'EU Central 1 (Frankfurt)', value: 'eu-central-1' },
-							{ name: 'AP Southeast 1 (Singapore)', value: 'ap-southeast-1' },
-						],
-						default: 'us-west-2',
-						description: 'Region where the browser session will run. Available: us-west-2 (Oregon), us-east-1 (Virginia), eu-central-1 (Frankfurt), ap-southeast-1 (Singapore). All sessions are created in us-west-2 by default.',
+			options: [
+				{
+					displayName: 'Context ID',
+					name: 'contextId',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. ctx_abc123',
+					description: 'Reuse cookies, auth, and cached data across sessions. Create a context via the Browserbase Contexts API first.',
+				},
+				{
+					displayName: 'Keep Alive',
+					name: 'keepAlive',
+					type: 'boolean',
+					default: false,
+					description: 'Whether to keep the session alive even after disconnections. Available on Hobby plan and above.',
+				},
+				{
+					displayName: 'Persist Context',
+					name: 'persistContext',
+					type: 'boolean',
+					default: true,
+					description: 'Whether to save session changes (cookies, auth tokens, cache) back to the context when the session ends. Only used when Context ID is set.',
+				},
+				{
+					displayName: 'Region',
+					name: 'region',
+					type: 'options',
+					options: [
+						{ name: 'AP Southeast 1 (Singapore)', value: 'ap-southeast-1' },
+						{ name: 'EU Central 1 (Frankfurt)', value: 'eu-central-1' },
+						{ name: 'US East 1 (Virginia)', value: 'us-east-1' },
+						{ name: 'US West 2 (Oregon)', value: 'us-west-2' },
+					],
+					default: 'us-west-2',
+					description: 'Region where the browser session will run',
+				},
+				{
+					displayName: 'Timeout',
+					name: 'timeout',
+					type: 'number',
+					default: 300,
+					typeOptions: {
+						minValue: 60,
+						maxValue: 21600,
 					},
-					{
-						displayName: 'Timeout',
-						name: 'timeout',
-						type: 'number',
-						default: 300,
-						description: 'Session timeout in seconds',
+					description: 'Session timeout in seconds (60-21600)',
+				},
+				{
+					displayName: 'Use Proxies',
+					name: 'proxies',
+					type: 'boolean',
+					default: true,
+					description: 'Whether to route traffic through proxies',
+				},
+				{
+					displayName: 'User Metadata',
+					name: 'userMetadata',
+					type: 'string',
+					typeOptions: {
+						rows: 3,
 					},
-					{
-						displayName: 'Use Proxies',
-						name: 'proxies',
-						type: 'boolean',
-						default: true,
-						description: 'Whether to route traffic through proxies',
-					},
-				],
+					default: '',
+					placeholder: '{"key": "value"}',
+					description: 'Arbitrary JSON metadata to attach to the session',
+				},
+			],
 			},
 		],
 	};
@@ -520,6 +595,10 @@ export class Browserbase implements INodeType {
 					advancedStealth?: boolean;
 					viewportWidth?: number;
 					viewportHeight?: number;
+					logSession?: boolean;
+					captchaImageSelector?: string;
+					captchaInputSelector?: string;
+					os?: string;
 				};
 				const sessionOptions = this.getNodeParameter(
 					'sessionOptions',
@@ -529,6 +608,10 @@ export class Browserbase implements INodeType {
 					region?: string;
 					timeout?: number;
 					proxies?: boolean;
+					contextId?: string;
+					persistContext?: boolean;
+					keepAlive?: boolean;
+					userMetadata?: string;
 				};
 
 				// Get credentials
@@ -574,24 +657,58 @@ export class Browserbase implements INodeType {
 
 				try {
 					// 1. Start session
+					const browserSettings: Record<string, unknown> = {
+						recordSession: browserOptions.recordSession ?? true,
+						solveCaptchas: browserOptions.solveCaptchas ?? false,
+						blockAds: browserOptions.blockAds ?? true,
+						advancedStealth: browserOptions.advancedStealth ?? false,
+						logSession: browserOptions.logSession ?? true,
+						viewport: {
+							width: browserOptions.viewportWidth ?? 1288,
+							height: browserOptions.viewportHeight ?? 711,
+						},
+					};
+
+					if (sessionOptions.contextId) {
+						browserSettings.context = {
+							id: sessionOptions.contextId,
+							persist: sessionOptions.persistContext ?? true,
+						};
+					}
+
+					if (browserOptions.captchaImageSelector) {
+						browserSettings.captchaImageSelector = browserOptions.captchaImageSelector;
+					}
+					if (browserOptions.captchaInputSelector) {
+						browserSettings.captchaInputSelector = browserOptions.captchaInputSelector;
+					}
+					if (browserOptions.os) {
+						browserSettings.os = browserOptions.os;
+					}
+
+					const sessionCreateParams: Record<string, unknown> = {
+						browserSettings,
+						region: sessionOptions.region ?? 'us-west-2',
+						timeout: sessionOptions.timeout ?? 300,
+						proxies: sessionOptions.proxies ?? true,
+					};
+
+					if (sessionOptions.keepAlive) {
+						sessionCreateParams.keepAlive = true;
+					}
+
+					if (sessionOptions.userMetadata) {
+						try {
+							sessionCreateParams.userMetadata = JSON.parse(sessionOptions.userMetadata);
+						} catch {
+							sessionCreateParams.userMetadata = { note: sessionOptions.userMetadata };
+						}
+					}
+
 					const startBody: Record<string, unknown> = {
 						modelName: driverModel,
 						apiKey: credentials.modelApiKey as string,
-						browserbaseSessionCreateParams: {
-							browserSettings: {
-								recordSession: browserOptions.recordSession ?? true,
-								solveCaptchas: browserOptions.solveCaptchas ?? false,
-								blockAds: browserOptions.blockAds ?? true,
-								advancedStealth: browserOptions.advancedStealth ?? false,
-								viewport: {
-									width: browserOptions.viewportWidth ?? 1288,
-									height: browserOptions.viewportHeight ?? 711,
-								},
-							},
-							region: sessionOptions.region ?? 'us-west-2',
-							timeout: sessionOptions.timeout ?? 300,
-							...(sessionOptions.proxies !== false ? { proxies: true } : {}),
-						},
+						browserbaseSessionCreateParams: sessionCreateParams,
 					};
 
 					const startResponse = await apiCall(
@@ -670,6 +787,7 @@ export class Browserbase implements INodeType {
 							completed: result.completed ?? true,
 							usage: result.usage ?? {},
 							sessionId,
+							...(sessionOptions.contextId ? { contextId: sessionOptions.contextId } : {}),
 						},
 						pairedItem: { item: i },
 					});

@@ -8,6 +8,9 @@
 # Node modules
 /node_modules
 
+# .DS_Store
+.DS_Store
+
 # Docker
 docker-compose.yml
 Dockerfile
