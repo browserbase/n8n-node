@@ -558,16 +558,16 @@ export class Browserbase implements INodeType {
 							json: true,
 						});
 						return response;
-				} catch (error: unknown) {
-					const err = error as { response?: { data?: unknown }; message?: string };
-					const detail = err.response?.data
-						? JSON.stringify(err.response.data)
-						: err.message ?? 'Unknown error';
-					throw new NodeOperationError(
-						this.getNode(),
-						`API call to ${endpoint} failed: ${detail}`,
-					);
-				}
+					} catch (error: unknown) {
+						const err = error as { response?: { data?: unknown }; message?: string };
+						const detail = err.response?.data
+							? JSON.stringify(err.response.data)
+							: err.message ?? 'Unknown error';
+						throw new NodeOperationError(
+							this.getNode(),
+							`API call to ${endpoint} failed: ${detail}`,
+						);
+					}
 				};
 
 				let sessionId: string | undefined;
