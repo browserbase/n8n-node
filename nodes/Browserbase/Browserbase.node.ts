@@ -558,10 +558,16 @@ export class Browserbase implements INodeType {
 							json: true,
 						});
 						return response;
-					} catch (error: unknown) {
-						const err = error as { response?: { data?: unknown }; message?: string };
-						throw err;
-					}
+				} catch (error: unknown) {
+					const err = error as { response?: { data?: unknown }; message?: string };
+					const detail = err.response?.data
+						? JSON.stringify(err.response.data)
+						: err.message ?? 'Unknown error';
+					throw new NodeOperationError(
+						this.getNode(),
+						`API call to ${endpoint} failed: ${detail}`,
+					);
+				}
 				};
 
 				let sessionId: string | undefined;
@@ -584,7 +590,7 @@ export class Browserbase implements INodeType {
 							},
 							region: sessionOptions.region ?? 'us-west-2',
 							timeout: sessionOptions.timeout ?? 300,
-							proxies: sessionOptions.proxies ?? true,
+							...(sessionOptions.proxies !== false ? { proxies: true } : {}),
 						},
 					};
 
