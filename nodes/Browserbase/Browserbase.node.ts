@@ -666,7 +666,7 @@ export class Browserbase implements INodeType {
 						browserSettings,
 						region: sessionOptions.region ?? 'us-west-2',
 						timeout: sessionOptions.timeout ?? 300,
-						proxies: sessionOptions.proxies ?? true,
+						...(sessionOptions.proxies !== false ? { proxies: true } : {}),
 					};
 
 					if (sessionOptions.keepAlive) {
