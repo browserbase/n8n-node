@@ -403,22 +403,6 @@ export class Browserbase implements INodeType {
 					description: 'Whether to block ads during browsing',
 				},
 				{
-					displayName: 'Captcha Image Selector',
-					name: 'captchaImageSelector',
-					type: 'string',
-					default: '',
-					placeholder: 'e.g. #captcha-image',
-					description: 'Custom CSS selector for the captcha image element. Used with Solve Captchas for custom captcha solving.',
-				},
-				{
-					displayName: 'Captcha Input Selector',
-					name: 'captchaInputSelector',
-					type: 'string',
-					default: '',
-					placeholder: 'e.g. #captcha-input',
-					description: 'Custom CSS selector for the captcha input element. Used with Solve Captchas for custom captcha solving.',
-				},
-				{
 					displayName: 'Log Session',
 					name: 'logSession',
 					type: 'boolean',
@@ -596,8 +580,6 @@ export class Browserbase implements INodeType {
 					viewportWidth?: number;
 					viewportHeight?: number;
 					logSession?: boolean;
-					captchaImageSelector?: string;
-					captchaInputSelector?: string;
 					os?: string;
 				};
 				const sessionOptions = this.getNodeParameter(
@@ -676,12 +658,6 @@ export class Browserbase implements INodeType {
 						};
 					}
 
-					if (browserOptions.captchaImageSelector) {
-						browserSettings.captchaImageSelector = browserOptions.captchaImageSelector;
-					}
-					if (browserOptions.captchaInputSelector) {
-						browserSettings.captchaInputSelector = browserOptions.captchaInputSelector;
-					}
 					if (browserOptions.os) {
 						browserSettings.os = browserOptions.os;
 					}
