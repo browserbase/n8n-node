@@ -1,6 +1,6 @@
 {
     "name": "n8n-nodes-browserbase",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "n8n community node for Browserbase",
     "license": "MIT",
     "homepage": "",
@@ -24,9 +24,7 @@
         "docker:logs": "docker compose logs -f n8n",
         "lint": "n8n-node lint",
         "lint:fix": "n8n-node lint --fix",
-        "changeset": "changeset",
-        "version": "changeset version",
-        "release": "npm run build && changeset publish",
+        "release": "release-it",
         "prepublishOnly": "n8n-node prerelease"
     },
     "files": [
@@ -43,7 +41,6 @@
         ]
     },
     "devDependencies": {
-        "@changesets/cli": "^2.29.4",
         "@n8n/node-cli": "*",
         "better-sqlite3": "^12.6.2",
         "eslint": "9.32.0",

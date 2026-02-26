@@ -374,6 +374,58 @@ export class Browserbase implements INodeType {
 					},
 				],
 			},
+			// Variables
+			{
+				displayName: 'Variables',
+				name: 'variables',
+				type: 'fixedCollection',
+				typeOptions: { multipleValues: true },
+				default: {},
+				placeholder: 'Add Variable',
+				description:
+					'Pass sensitive data to the agent. The LLM sees %variableName% placeholders and descriptions, but never the actual values.',
+				displayOptions: {
+					show: {
+						resource: ['agent'],
+						operation: ['execute'],
+						mode: ['dom', 'hybrid'],
+					},
+				},
+				options: [
+					{
+						name: 'variableValues',
+						displayName: 'Variable',
+						values: [
+							{
+								displayName: 'Name',
+								name: 'name',
+								type: 'string',
+								default: '',
+								placeholder: 'e.g. username',
+								description: 'Variable name (used as %name% in instructions)',
+							},
+							{
+								displayName: 'Value',
+								name: 'value',
+								type: 'string',
+								default: '',
+								typeOptions: { password: true },
+								placeholder: 'e.g. john@example.com',
+								description: 'The actual value (never shown to the LLM)',
+							},
+							{
+								displayName: 'Description',
+								name: 'description',
+								type: 'string',
+								default: '',
+								placeholder: 'e.g. The login email address',
+								description:
+									'Optional description visible to the LLM to understand what this variable is for',
+							},
+						],
+					},
+				],
+			},
 			// Browser Options
 			{
 				displayName: 'Browser Options',
@@ -729,6 +781,31 @@ export class Browserbase implements INodeType {
 							maxSteps: options.maxSteps ?? 20,
 						},
 					};
+
+					if (mode === 'dom' || mode === 'hybrid') {
+						const variablesParam = this.getNodeParameter('variables', i, {}) as {
+							variableValues?: Array<{
+								name: string;
+								value: string;
+								description?: string;
+							}>;
+						};
+
+						if (variablesParam.variableValues?.length) {
+							const variables: Record<string, { value: string; description?: string }> = {};
+							for (const v of variablesParam.variableValues) {
+								if (v.name) {
+									variables[v.name] = v.description
+										? { value: v.value, description: v.description }
+										: { value: v.value };
+								}
+							}
+							if (Object.keys(variables).length > 0) {
+								(executeBody.executeOptions as Record<string, unknown>).variables =
+									variables;
+							}
+						}
+					}
 
 					if (options.systemPrompt) {
 						(executeBody.agentConfig as Record<string, unknown>).systemPrompt =
