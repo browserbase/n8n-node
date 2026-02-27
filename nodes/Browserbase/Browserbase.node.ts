@@ -231,8 +231,24 @@ export class Browserbase implements INodeType {
 						value: 'anthropic/claude-haiku-4-5-20251001',
 					},
 					{
+						name: 'Claude Opus 4.5 (Anthropic)',
+						value: 'anthropic/claude-opus-4-5-20251101',
+					},
+					{
+						name: 'Claude Opus 4.6 (Anthropic)',
+						value: 'anthropic/claude-opus-4-6',
+					},
+					{
 						name: 'Claude Sonnet 4.5 (Anthropic)',
 						value: 'anthropic/claude-sonnet-4-5-20250929',
+					},
+					{
+						name: 'Claude Sonnet 4.6 (Anthropic)',
+						value: 'anthropic/claude-sonnet-4-6',
+					},
+					{
+						name: 'Computer Use Preview (2025-03-11, OpenAI)',
+						value: 'openai/computer-use-preview-2025-03-11',
 					},
 					{
 						name: 'Computer Use Preview (OpenAI)',
@@ -241,6 +257,14 @@ export class Browserbase implements INodeType {
 					{
 						name: 'Gemini 2.5 CUA (Google)',
 						value: 'google/gemini-2.5-computer-use-preview-10-2025',
+					},
+					{
+						name: 'Gemini 3 Flash (Google)',
+						value: 'google/gemini-3-flash-preview',
+					},
+					{
+						name: 'Gemini 3 Pro (Google)',
+						value: 'google/gemini-3-pro-preview',
 					},
 				],
 				default: 'google/gemini-2.5-computer-use-preview-10-2025',
