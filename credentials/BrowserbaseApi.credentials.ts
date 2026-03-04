@@ -32,15 +32,6 @@ export class BrowserbaseApi implements ICredentialType {
 			required: true,
 			description: 'Your Browserbase project ID',
 		},
-		{
-			displayName: 'Model API Key',
-			name: 'modelApiKey',
-			type: 'string',
-			typeOptions: { password: true },
-			default: '',
-			required: true,
-			description: 'API key for the AI model (e.g., Gemini API key)',
-		},
 	];
 
 	authenticate: IAuthenticateGeneric = {
@@ -49,7 +40,6 @@ export class BrowserbaseApi implements ICredentialType {
 			headers: {
 				'x-bb-api-key': '={{$credentials.browserbaseApiKey}}',
 				'x-bb-project-id': '={{$credentials.browserbaseProjectId}}',
-				'x-model-api-key': '={{$credentials.modelApiKey}}',
 			},
 		},
 	};
