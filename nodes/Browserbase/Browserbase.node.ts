@@ -679,7 +679,6 @@ export class Browserbase implements INodeType {
 					'Content-Type': 'application/json',
 					'x-bb-api-key': credentials.browserbaseApiKey as string,
 					'x-bb-project-id': credentials.browserbaseProjectId as string,
-					'x-model-api-key': credentials.modelApiKey as string,
 				};
 
 				// Helper function to make API calls
@@ -759,7 +758,6 @@ export class Browserbase implements INodeType {
 
 					const startBody: Record<string, unknown> = {
 						modelName: driverModel,
-						apiKey: credentials.modelApiKey as string,
 						browserbaseSessionCreateParams: sessionCreateParams,
 					};
 
@@ -796,7 +794,6 @@ export class Browserbase implements INodeType {
 							provider,
 							model: {
 								modelName: agentModel,
-								apiKey: credentials.modelApiKey as string,
 							},
 							cua: mode === 'cua' || mode === 'hybrid',
 						},
