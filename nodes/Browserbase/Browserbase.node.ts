@@ -1,6 +1,10 @@
 import {
 	NodeConnectionTypes,
+	type ICredentialDataDecryptedObject,
+	type ICredentialTestFunctions,
+	type ICredentialsDecrypted,
 	type IExecuteFunctions,
+	type INodeCredentialTestResult,
 	type INodeExecutionData,
 	type INodeType,
 	type INodeTypeDescription,
@@ -30,6 +34,7 @@ export class Browserbase implements INodeType {
 			{
 				name: 'browserbaseApi',
 				required: true,
+				testedBy: 'browserbaseApiTest',
 			},
 		],
 		properties: [
@@ -613,6 +618,79 @@ export class Browserbase implements INodeType {
 		],
 	};
 
+	methods = {
+		credentialTest: {
+			async browserbaseApiTest(
+				this: ICredentialTestFunctions,
+				credential: ICredentialsDecrypted<ICredentialDataDecryptedObject>,
+			): Promise<INodeCredentialTestResult> {
+				const { browserbaseApiKey, browserbaseProjectId, modelApiKey } =
+					credential.data!;
+
+				const headers: Record<string, string> = {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'x-bb-api-key': browserbaseApiKey as string,
+					'x-model-api-key': modelApiKey as string,
+				};
+				if (browserbaseProjectId) {
+					headers['x-bb-project-id'] = browserbaseProjectId as string;
+				}
+
+				let sessionId: string | undefined;
+
+				const httpRequest = this.helpers[
+					'request' as keyof typeof this.helpers
+				] as (opts: object) => Promise<Record<string, unknown>>;
+
+				try {
+					const startResponse = await httpRequest({
+						method: 'POST',
+						uri: `${BASE_URL}/v1/sessions/start`,
+						headers,
+						body: { modelName: 'openai/gpt-4o' },
+						json: true,
+					});
+
+					const data = startResponse.data as Record<string, unknown> | undefined;
+					sessionId = (data?.sessionId ??
+						startResponse.sessionId ??
+						startResponse.id) as string | undefined;
+
+					if (sessionId) {
+						await httpRequest({
+							method: 'POST',
+							uri: `${BASE_URL}/v1/sessions/${sessionId}/end`,
+							headers,
+							body: {},
+							json: true,
+						});
+					}
+
+					return { status: 'OK', message: 'Connection successful' };
+				} catch (error) {
+					if (sessionId) {
+						try {
+							await httpRequest({
+								method: 'POST',
+								uri: `${BASE_URL}/v1/sessions/${sessionId}/end`,
+								headers,
+								body: {},
+								json: true,
+							});
+						} catch {
+							// Ignore cleanup errors
+						}
+					}
+
+					const msg =
+						error instanceof Error ? error.message : String(error);
+					return { status: 'Error', message: msg };
+				}
+			},
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -674,13 +752,16 @@ export class Browserbase implements INodeType {
 
 				// Get credentials
 				const credentials = await this.getCredentials('browserbaseApi');
-				const headers = {
+				const headers: Record<string, string> = {
 					Accept: 'application/json',
 					'Content-Type': 'application/json',
 					'x-bb-api-key': credentials.browserbaseApiKey as string,
-					'x-bb-project-id': credentials.browserbaseProjectId as string,
 					'x-model-api-key': credentials.modelApiKey as string,
 				};
+				// We no longer need to set the Project ID, but keeping this here for backwards compatibility
+				if (credentials.browserbaseProjectId) {
+					headers['x-bb-project-id'] = credentials.browserbaseProjectId as string;
+				}
 
 				// Helper function to make API calls
 				const apiCall = async (
