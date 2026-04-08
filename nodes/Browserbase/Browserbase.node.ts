@@ -140,13 +140,13 @@ export class Browserbase implements INodeType {
 						description: 'Use Browserbase-managed model routing. Mix any providers freely.',
 					},
 					{
-						name: 'Own API Key',
-						value: 'ownKey',
+						name: 'User-Provided API Key',
+						value: 'userProvidedKey',
 						description: 'Use your own model API key from credentials. Same provider required for both models.',
 					},
 				],
 				default: 'gateway',
-				description: 'Choose how model calls are routed. Model Gateway lets you mix providers; Own API Key requires both models from the same provider.',
+				description: 'Choose how model calls are routed. Model Gateway lets you mix providers; User-provided API key requires both models from the same provider.',
 			},
 			{
 				displayName: 'Model Info',
@@ -165,14 +165,14 @@ export class Browserbase implements INodeType {
 			},
 			{
 				displayName: 'Model Info',
-				name: 'modelNoticeByok',
+				name: 'modelNoticeBYOK',
 				type: 'notice',
 				default: '',
 				displayOptions: {
 					show: {
 						resource: ['agent'],
 						operation: ['execute'],
-						modelSource: ['ownKey'],
+						modelSource: ['userProvidedKey'],
 					},
 				},
 				description:
@@ -718,7 +718,7 @@ export class Browserbase implements INodeType {
 					agentModel = this.getNodeParameter('modelHybrid', i) as string;
 				}
 
-				if (modelSource === 'ownKey') {
+				if (modelSource === 'userProvidedKey') {
 					const driverProvider = driverModel.split('/')[0];
 					const agentProvider = agentModel.split('/')[0];
 					if (driverProvider !== agentProvider) {
@@ -768,12 +768,12 @@ export class Browserbase implements INodeType {
 					'Content-Type': 'application/json',
 					'x-bb-api-key': credentials.browserbaseApiKey as string,
 				};
-				if (modelSource === 'ownKey') {
+				if (modelSource === 'userProvidedKey') {
 					const modelApiKey = credentials.modelApiKey as string;
 					if (!modelApiKey) {
 						throw new NodeOperationError(
 							this.getNode(),
-							'Model Source is set to "Own API Key" but no Model API Key is configured in the Browserbase credentials.',
+							'Model Source is set to "User-provided API key" but no Model API Key is configured in the Browserbase credentials.',
 						);
 					}
 					headers['x-model-api-key'] = modelApiKey;
