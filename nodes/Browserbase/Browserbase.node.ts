@@ -122,20 +122,61 @@ export class Browserbase implements INodeType {
 					},
 				},
 			},
-			// Notice about models
 			{
-				displayName: 'Model Info',
-				name: 'modelNotice',
-				type: 'notice',
-				default: '',
+				displayName: 'Model Source',
+				name: 'modelSource',
+				type: 'options',
+				noDataExpression: true,
 				displayOptions: {
 					show: {
 						resource: ['agent'],
 						operation: ['execute'],
 					},
 				},
+				options: [
+					{
+						name: 'Model Gateway (Browserbase)',
+						value: 'gateway',
+						description: 'Use Browserbase-managed model routing. Mix any providers freely.',
+					},
+					{
+						name: 'Own API Key',
+						value: 'ownKey',
+						description: 'Use your own model API key from credentials. Same provider required for both models.',
+					},
+				],
+				default: 'gateway',
+				description: 'Choose how model calls are routed. Model Gateway lets you mix providers; Own API Key requires both models from the same provider.',
+			},
+			{
+				displayName: 'Model Info',
+				name: 'modelNoticeGateway',
+				type: 'notice',
+				default: '',
+				displayOptions: {
+					show: {
+						resource: ['agent'],
+						operation: ['execute'],
+						modelSource: ['gateway'],
+					},
+				},
 				description:
-					'Driver Model is used for the actual primitive operations. Agent Model is used for orchestration. For now pick both models from the same provider.',
+					'Using the Browserbase Model Gateway. You can freely mix models from different providers for Driver and Agent.',
+			},
+			{
+				displayName: 'Model Info',
+				name: 'modelNoticeByok',
+				type: 'notice',
+				default: '',
+				displayOptions: {
+					show: {
+						resource: ['agent'],
+						operation: ['execute'],
+						modelSource: ['ownKey'],
+					},
+				},
+				description:
+					'Using your own API key from credentials. Both Driver and Agent models MUST be from the same provider.',
 			},
 			// Driver Model for session start
 			{
@@ -150,28 +191,24 @@ export class Browserbase implements INodeType {
 				},
 				options: [
 					{
-						name: 'Claude Opus 4.5 (Anthropic)',
-						value: 'anthropic/claude-opus-4-5',
+						name: 'Claude Haiku 4.5 (Anthropic)',
+						value: 'anthropic/claude-haiku-4-5',
 					},
 					{
-						name: 'Claude Sonnet 4.5 (Anthropic)',
-						value: 'anthropic/claude-sonnet-4-5-20250929',
+						name: 'Claude Opus 4.6 (Anthropic)',
+						value: 'anthropic/claude-opus-4-6',
 					},
 					{
-						name: 'Gemini 2.5 Flash (Google)',
-						value: 'google/gemini-2.5-flash',
-					},
-					{
-						name: 'Gemini 2.5 Pro (Google)',
-						value: 'google/gemini-2.5-pro',
+						name: 'Claude Sonnet 4.6 (Anthropic)',
+						value: 'anthropic/claude-sonnet-4-6',
 					},
 					{
 						name: 'Gemini 3 Flash (Google)',
-						value: 'google/gemini-3-flash-preview',
+						value: 'google/gemini-3-flash',
 					},
 					{
 						name: 'Gemini 3 Pro (Google)',
-						value: 'google/gemini-3-pro-preview',
+						value: 'google/gemini-3-pro',
 					},
 					{
 						name: 'GPT-4o (OpenAI)',
@@ -182,7 +219,7 @@ export class Browserbase implements INodeType {
 						value: 'openai/gpt-4o-mini',
 					},
 				],
-				default: 'google/gemini-2.5-flash',
+				default: 'anthropic/claude-sonnet-4-6',
 				description: 'Model for browser session (DOM-based, used for navigation)',
 			},
 			// Mode selection
@@ -233,19 +270,11 @@ export class Browserbase implements INodeType {
 				options: [
 					{
 						name: 'Claude Haiku 4.5 (Anthropic)',
-						value: 'anthropic/claude-haiku-4-5-20251001',
-					},
-					{
-						name: 'Claude Opus 4.5 (Anthropic)',
-						value: 'anthropic/claude-opus-4-5-20251101',
+						value: 'anthropic/claude-haiku-4-5',
 					},
 					{
 						name: 'Claude Opus 4.6 (Anthropic)',
 						value: 'anthropic/claude-opus-4-6',
-					},
-					{
-						name: 'Claude Sonnet 4.5 (Anthropic)',
-						value: 'anthropic/claude-sonnet-4-5-20250929',
 					},
 					{
 						name: 'Claude Sonnet 4.6 (Anthropic)',
@@ -272,7 +301,7 @@ export class Browserbase implements INodeType {
 						value: 'google/gemini-3-pro-preview',
 					},
 				],
-				default: 'google/gemini-2.5-computer-use-preview-10-2025',
+				default: 'anthropic/claude-sonnet-4-6',
 				description: 'CUA model for vision-based browser control',
 			},
 			// DOM Models
@@ -289,20 +318,8 @@ export class Browserbase implements INodeType {
 				},
 				options: [
 					{
-						name: 'Claude Opus 4.5 (Anthropic)',
-						value: 'anthropic/claude-opus-4-5',
-					},
-					{
-						name: 'Claude Sonnet 4.5 (Anthropic)',
-						value: 'anthropic/claude-sonnet-4-5-20250929',
-					},
-					{
-						name: 'Gemini 2.5 Flash (Google)',
-						value: 'google/gemini-2.5-flash',
-					},
-					{
-						name: 'Gemini 2.5 Pro (Google)',
-						value: 'google/gemini-2.5-pro',
+						name: 'Claude Sonnet 4.6 (Anthropic)',
+						value: 'anthropic/claude-sonnet-4-6',
 					},
 					{
 						name: 'Gemini 3 Flash (Google)',
@@ -325,7 +342,7 @@ export class Browserbase implements INodeType {
 						value: 'openai/gpt-4o-mini',
 					},
 				],
-				default: 'google/gemini-2.5-flash',
+				default: 'anthropic/claude-sonnet-4-6',
 				description: 'LLM for DOM-based browser control',
 			},
 			// Hybrid Models
@@ -346,19 +363,15 @@ export class Browserbase implements INodeType {
 						value: 'google/gemini-3-flash-preview',
 					},
 					{
-						name: 'Claude Sonnet 4.5 (Anthropic)',
-						value: 'anthropic/claude-sonnet-4-5-20250929',					
-					},
-					{
-						name: 'Claude Sonnet 4 (Anthropic)',
-						value: 'anthropic/claude-sonnet-4-20250514',
+						name: 'Claude Sonnet 4.6 (Anthropic)',
+						value: 'anthropic/claude-sonnet-4-6',
 					},
 					{
 						name: 'Claude Haiku 4.5 (Anthropic)',
 						value: 'anthropic/claude-haiku-4-5-20251001',
 					},
 				],
-				default: 'google/gemini-3-flash-preview',
+				default: 'anthropic/claude-sonnet-4-6',
 				description: 'Model for hybrid mode (must support coordinate actions)',
 			},
 			// Options collection (combines agent options)
@@ -491,21 +504,6 @@ export class Browserbase implements INodeType {
 						description: 'Whether to enable session logging',
 					},
 					{
-						displayName: 'OS',
-						name: 'os',
-						type: 'options',
-						options: [
-							{ name: 'Default', value: '' },
-							{ name: 'Linux', value: 'linux' },
-							{ name: 'Mac', value: 'mac' },
-							{ name: 'Mobile', value: 'mobile' },
-							{ name: 'Tablet', value: 'tablet' },
-							{ name: 'Windows', value: 'windows' },
-						],
-						default: '',
-						description: 'OS for advanced stealth mode. Controls user agent and browser environment signals.',
-					},
-					{
 						displayName: 'Record Session',
 						name: 'recordSession',
 						type: 'boolean',
@@ -631,10 +629,13 @@ export class Browserbase implements INodeType {
 					Accept: 'application/json',
 					'Content-Type': 'application/json',
 					'x-bb-api-key': browserbaseApiKey as string,
-					'x-model-api-key': modelApiKey as string,
 				};
-				if (browserbaseProjectId) {
-					headers['x-bb-project-id'] = browserbaseProjectId as string;
+				if (modelApiKey) {
+					headers['x-model-api-key'] = modelApiKey as string;
+				}
+				const projectId = (browserbaseProjectId as string)?.trim();
+				if (projectId) {
+					headers['x-bb-project-id'] = projectId;
 				}
 
 				let sessionId: string | undefined;
@@ -704,10 +705,10 @@ export class Browserbase implements INodeType {
 					url = `https://${url}`;
 				}
 				const instruction = this.getNodeParameter('instruction', i) as string;
+				const modelSource = this.getNodeParameter('modelSource', i) as string;
 				const driverModel = this.getNodeParameter('driverModel', i) as string;
 				const mode = this.getNodeParameter('mode', i) as string;
 
-				// Get agent model based on mode
 				let agentModel: string;
 				if (mode === 'cua') {
 					agentModel = this.getNodeParameter('modelCua', i) as string;
@@ -715,6 +716,17 @@ export class Browserbase implements INodeType {
 					agentModel = this.getNodeParameter('modelDom', i) as string;
 				} else {
 					agentModel = this.getNodeParameter('modelHybrid', i) as string;
+				}
+
+				if (modelSource === 'ownKey') {
+					const driverProvider = driverModel.split('/')[0];
+					const agentProvider = agentModel.split('/')[0];
+					if (driverProvider !== agentProvider) {
+						throw new NodeOperationError(
+							this.getNode(),
+							`When using your own model API key, both Driver and Agent models must be from the same provider. Driver is "${driverProvider}", Agent is "${agentProvider}".`,
+						);
+					}
 				}
 
 				const options = this.getNodeParameter('options', i, {}) as {
@@ -750,17 +762,25 @@ export class Browserbase implements INodeType {
 					userMetadata?: string;
 				};
 
-				// Get credentials
 				const credentials = await this.getCredentials('browserbaseApi');
 				const headers: Record<string, string> = {
 					Accept: 'application/json',
 					'Content-Type': 'application/json',
 					'x-bb-api-key': credentials.browserbaseApiKey as string,
-					'x-model-api-key': credentials.modelApiKey as string,
 				};
-				// We no longer need to set the Project ID, but keeping this here for backwards compatibility
-				if (credentials.browserbaseProjectId) {
-					headers['x-bb-project-id'] = credentials.browserbaseProjectId as string;
+				if (modelSource === 'ownKey') {
+					const modelApiKey = credentials.modelApiKey as string;
+					if (!modelApiKey) {
+						throw new NodeOperationError(
+							this.getNode(),
+							'Model Source is set to "Own API Key" but no Model API Key is configured in the Browserbase credentials.',
+						);
+					}
+					headers['x-model-api-key'] = modelApiKey;
+				}
+				const projectId = (credentials.browserbaseProjectId as string)?.trim();
+				if (projectId) {
+					headers['x-bb-project-id'] = projectId;
 				}
 
 				// Helper function to make API calls
@@ -832,15 +852,16 @@ export class Browserbase implements INodeType {
 
 					if (sessionOptions.userMetadata) {
 						try {
-							sessionCreateParams.userMetadata = JSON.parse(sessionOptions.userMetadata);
+							sessionCreateParams.userMetadata = { n8n: 'true', ...JSON.parse(sessionOptions.userMetadata) };
 						} catch {
-							sessionCreateParams.userMetadata = { note: sessionOptions.userMetadata };
+							sessionCreateParams.userMetadata = { n8n: 'true', note: sessionOptions.userMetadata };
 						}
+					} else {
+						sessionCreateParams.userMetadata = { n8n: 'true' };
 					}
 
 					const startBody: Record<string, unknown> = {
 						modelName: driverModel,
-						apiKey: credentials.modelApiKey as string,
 						browserbaseSessionCreateParams: sessionCreateParams,
 					};
 
@@ -870,22 +891,25 @@ export class Browserbase implements INodeType {
 					});
 
 					// 3. Execute agent
-					const provider = agentModel.split('/')[0];
-
-					const executeBody: Record<string, unknown> = {
-						agentConfig: {
-							provider,
-							model: {
-								modelName: agentModel,
-								apiKey: credentials.modelApiKey as string,
-							},
-							cua: mode === 'cua' || mode === 'hybrid',
-						},
-						executeOptions: {
-							instruction,
-							maxSteps: options.maxSteps ?? 20,
-						},
+					const agentConfigBody: Record<string, unknown> = {
+						model: agentModel,
 					};
+
+					if (options.systemPrompt) {
+						agentConfigBody.systemPrompt = options.systemPrompt;
+					}
+
+					const executeOpts: Record<string, unknown> = {
+						instruction,
+						maxSteps: options.maxSteps ?? 20,
+					};
+
+					if (
+						(mode === 'cua' || mode === 'hybrid') &&
+						options.highlightCursor !== false
+					) {
+						executeOpts.highlightCursor = options.highlightCursor ?? true;
+					}
 
 					if (mode === 'dom' || mode === 'hybrid') {
 						const variablesParam = this.getNodeParameter('variables', i, {}) as {
@@ -906,29 +930,18 @@ export class Browserbase implements INodeType {
 								}
 							}
 							if (Object.keys(variables).length > 0) {
-								(executeBody.executeOptions as Record<string, unknown>).variables =
-									variables;
+								executeOpts.variables = variables;
 							}
 						}
-					}
-
-					if (options.systemPrompt) {
-						(executeBody.agentConfig as Record<string, unknown>).systemPrompt =
-							options.systemPrompt;
-					}
-
-					if (
-						(mode === 'cua' || mode === 'hybrid') &&
-						options.highlightCursor !== false
-					) {
-						(executeBody.executeOptions as Record<string, unknown>).highlightCursor =
-							options.highlightCursor ?? true;
 					}
 
 					const executeResponse = await apiCall(
 						'POST',
 						`/v1/sessions/${sessionId}/agentExecute`,
-						executeBody,
+						{
+							agentConfig: agentConfigBody,
+							executeOptions: executeOpts,
+						},
 					);
 
 					// 4. End session

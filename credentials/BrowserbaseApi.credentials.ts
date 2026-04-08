@@ -37,8 +37,8 @@ export class BrowserbaseApi implements ICredentialType {
 			type: 'string',
 			typeOptions: { password: true },
 			default: '',
-			required: true,
-			description: 'API key for the AI model (e.g., Gemini API key)',
+			required: false,
+			description: 'Optional. Provide your own model API key, or leave blank to use the <a href="https://docs.browserbase.com/platform/model-gateway/overview">Browserbase Model Gateway</a>.',
 		},
 	];
 
@@ -47,7 +47,6 @@ export class BrowserbaseApi implements ICredentialType {
 		properties: {
 			headers: {
 				'x-bb-api-key': '={{$credentials.browserbaseApiKey}}',
-				'x-model-api-key': '={{$credentials.modelApiKey}}',
 			},
 		},
 	};
