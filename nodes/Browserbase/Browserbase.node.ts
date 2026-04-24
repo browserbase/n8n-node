@@ -679,8 +679,9 @@ export class Browserbase implements INodeType {
 								body: {},
 								json: true,
 							});
-						} catch {
-							// Ignore cleanup errors
+						} catch (cleanupError) {
+							// Best-effort cleanup; ignore failures so the original test error surfaces.
+							void cleanupError;
 						}
 					}
 
@@ -853,7 +854,8 @@ export class Browserbase implements INodeType {
 					if (sessionOptions.userMetadata) {
 						try {
 							sessionCreateParams.userMetadata = { n8n: 'true', ...JSON.parse(sessionOptions.userMetadata) };
-						} catch {
+						} catch (parseError) {
+							void parseError;
 							sessionCreateParams.userMetadata = { n8n: 'true', note: sessionOptions.userMetadata };
 						}
 					} else {
@@ -965,10 +967,11 @@ export class Browserbase implements INodeType {
 					// Try to end session if it was created
 					if (sessionId) {
 						try {
-							await apiCall('POST', `/v1/sessions/${sessionId}/end`, {});
-						} catch {
-							// Ignore cleanup errors
-						}
+						await apiCall('POST', `/v1/sessions/${sessionId}/end`, {});
+					} catch (cleanupError) {
+						// Best-effort session close after an error; ignore cleanup failures.
+						void cleanupError;
+					}
 					}
 					throw error;
 				}
