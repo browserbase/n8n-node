@@ -818,11 +818,15 @@ export class Browserbase implements INodeType {
 				try {
 					// 1. Start session
 					const browserSettings: Record<string, unknown> = {
-						recordSession: browserOptions.recordSession ?? true,
+						recordSession: credentials.disableSessionRecording
+							? false
+							: (browserOptions.recordSession ?? true),
 						solveCaptchas: browserOptions.solveCaptchas ?? false,
 						blockAds: browserOptions.blockAds ?? true,
 						advancedStealth: browserOptions.advancedStealth ?? false,
-						logSession: browserOptions.logSession ?? true,
+						logSession: credentials.disableSessionLogging
+							? false
+							: (browserOptions.logSession ?? true),
 						viewport: {
 							width: browserOptions.viewportWidth ?? 1288,
 							height: browserOptions.viewportHeight ?? 711,

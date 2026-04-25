@@ -40,6 +40,20 @@ export class BrowserbaseApi implements ICredentialType {
 			required: false,
 			description: 'Optional. Provide your own model API key, or leave blank to use the <a href="https://docs.browserbase.com/platform/model-gateway/overview">Browserbase Model Gateway</a>.',
 		},
+		{
+			displayName: 'Disable Session Recording',
+			name: 'disableSessionRecording',
+			type: 'boolean',
+			default: false,
+			description: 'Whether to force-disable session recording for all workflows using this credential. When enabled, the per-node "Record Session" option is ignored and recording is always off.',
+		},
+		{
+			displayName: 'Disable Session Logging',
+			name: 'disableSessionLogging',
+			type: 'boolean',
+			default: false,
+			description: 'Whether to force-disable session logging for all workflows using this credential. When enabled, the per-node "Log Session" option is ignored and logging is always off.',
+		},
 	];
 
 	authenticate: IAuthenticateGeneric = {
