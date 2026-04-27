@@ -8,6 +8,7 @@
     "git": {
         "commitMessage": "chore: release v${version}",
         "tagName": "v${version}",
-        "requireUpstream": false
+        "requireUpstream": false,
+        "requireCleanWorkingDir": true
     }
 }

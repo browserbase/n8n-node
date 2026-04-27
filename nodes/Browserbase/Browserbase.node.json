@@ -3,9 +3,6 @@
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Development", "Developer Tools"],
-	"subcategories": {
-		"Development": ["Browser Automation"]
-	},
 	"resources": {
 		"primaryDocumentation": [
 			{
@@ -13,6 +10,5 @@
 			}
 		]
 	},
-	"alias": ["browser", "automation", "web", "scrape", "ai agent", "stagehand"],
-	"n8nNodesApiVersion": 1
+	"alias": ["browser", "automation", "web", "scrape", "ai agent", "stagehand"]
 }

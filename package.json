@@ -1,9 +1,9 @@
 {
     "name": "n8n-nodes-browserbase",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "description": "n8n community node for Browserbase",
     "license": "MIT",
-    "homepage": "",
+    "homepage": "https://github.com/browserbase/n8n-node",
     "keywords": [
         "n8n-community-node-package"
     ],
