@@ -53,9 +53,7 @@ function normalizeUrl(url: string): string {
 
 function getSessionId(response: Record<string, unknown>): string | undefined {
 	const data = response.data as Record<string, unknown> | undefined;
-	return (data?.sessionId ?? response.sessionId ?? response.id) as
-		| string
-		| undefined;
+	return (data?.sessionId ?? response.sessionId ?? response.id) as string | undefined;
 }
 
 function getHeaders(
@@ -232,7 +230,8 @@ function buildProperties(): INodeProperties[] {
 				{
 					name: 'User-Provided API Key',
 					value: 'userProvidedKey',
-					description: 'Use your own model API key from credentials. Same provider required for both models.',
+					description:
+						'Use your own model API key from credentials. Same provider required for both models.',
 				},
 			],
 			default: 'gateway',
@@ -476,8 +475,7 @@ function buildProperties(): INodeProperties[] {
 					name: 'highlightCursor',
 					type: 'boolean',
 					default: true,
-					description:
-						'Whether to highlight the cursor during execution (CUA/Hybrid only)',
+					description: 'Whether to highlight the cursor during execution (CUA/Hybrid only)',
 				},
 				{
 					displayName: 'Max Steps',
@@ -562,11 +560,11 @@ function buildProperties(): INodeProperties[] {
 					operation: ['execute'],
 				},
 			},
-				options: [
-					{
-						displayName: 'Block Ads',
-						name: 'blockAds',
-						type: 'boolean',
+			options: [
+				{
+					displayName: 'Block Ads',
+					name: 'blockAds',
+					type: 'boolean',
 					default: true,
 					description: 'Whether to block ads during browsing',
 				},
@@ -584,24 +582,24 @@ function buildProperties(): INodeProperties[] {
 					default: true,
 					description: 'Whether to record the browser session for replay',
 				},
-					{
-						displayName: 'Solve Captchas',
-						name: 'solveCaptchas',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to automatically solve captchas encountered during execution',
-					},
-					{
-						displayName: 'Verified',
-						name: 'verified',
-						type: 'boolean',
-						default: false,
-						description:
-							'Whether to use a verified browser identity recognized by Browserbase bot protection partners',
-					},
-					{
-						displayName: 'Viewport Height',
-						name: 'viewportHeight',
+				{
+					displayName: 'Solve Captchas',
+					name: 'solveCaptchas',
+					type: 'boolean',
+					default: false,
+					description: 'Whether to automatically solve captchas encountered during execution',
+				},
+				{
+					displayName: 'Verified',
+					name: 'verified',
+					type: 'boolean',
+					default: false,
+					description:
+						'Whether to use a verified browser identity recognized by Browserbase bot protection partners',
+				},
+				{
+					displayName: 'Viewport Height',
+					name: 'viewportHeight',
 					type: 'number',
 					default: 711,
 					description: 'Browser viewport height in pixels (711 recommended for CUA)',
@@ -642,7 +640,8 @@ function buildProperties(): INodeProperties[] {
 					name: 'keepAlive',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to keep the session alive even after disconnections. Available on Hobby plan and above.',
+					description:
+						'Whether to keep the session alive even after disconnections. Available on Hobby plan and above.',
 				},
 				{
 					displayName: 'Persist Context',
@@ -794,8 +793,7 @@ export class Browserbase implements INodeType {
 		version: 2,
 		subtitle:
 			'={{$parameter["resource"] === "agent" ? $parameter["operation"] + ": " + $parameter["mode"] : $parameter["operation"]}}',
-		description:
-			'Browser automation, web search, and page fetches with Browserbase.',
+		description: 'Browser automation, web search, and page fetches with Browserbase.',
 		defaults: {
 			name: 'Browserbase',
 		},
@@ -820,9 +818,9 @@ export class Browserbase implements INodeType {
 			): Promise<INodeCredentialTestResult> {
 				try {
 					const headers = getHeaders(credential.data!);
-					const httpRequest = this.helpers[
-						'request' as keyof typeof this.helpers
-					] as (opts: object) => Promise<Record<string, unknown>>;
+					const httpRequest = this.helpers['request' as keyof typeof this.helpers] as (
+						opts: object,
+					) => Promise<Record<string, unknown>>;
 
 					await httpRequest({
 						method: 'POST',
@@ -864,7 +862,7 @@ export class Browserbase implements INodeType {
 			};
 			const detail = err.response?.data
 				? JSON.stringify(err.response.data)
-				: err.message ?? 'Unknown error';
+				: (err.message ?? 'Unknown error');
 			throw new NodeOperationError(
 				executeFunctions.getNode(),
 				`API call to ${endpoint} failed: ${detail}`,
@@ -878,10 +876,7 @@ export class Browserbase implements INodeType {
 		headers: BrowserbaseHeaders,
 	): Promise<INodeExecutionData> {
 		const query = executeFunctions.getNodeParameter('query', itemIndex) as string;
-		const numResults = executeFunctions.getNodeParameter(
-			'numResults',
-			itemIndex,
-		) as number;
+		const numResults = executeFunctions.getNodeParameter('numResults', itemIndex) as number;
 
 		const response = await this.apiCall(
 			executeFunctions,
@@ -895,8 +890,7 @@ export class Browserbase implements INodeType {
 			},
 		);
 
-		const results =
-			(response.results as Array<Record<string, unknown>> | undefined) ?? [];
+		const results = (response.results as Array<Record<string, unknown>> | undefined) ?? [];
 
 		return {
 			json: {
@@ -914,14 +908,8 @@ export class Browserbase implements INodeType {
 		itemIndex: number,
 		headers: BrowserbaseHeaders,
 	): Promise<INodeExecutionData> {
-		const url = normalizeUrl(
-			executeFunctions.getNodeParameter('fetchUrl', itemIndex) as string,
-		);
-		const fetchOptions = executeFunctions.getNodeParameter(
-			'fetchOptions',
-			itemIndex,
-			{},
-		) as {
+		const url = normalizeUrl(executeFunctions.getNodeParameter('fetchUrl', itemIndex) as string);
+		const fetchOptions = executeFunctions.getNodeParameter('fetchOptions', itemIndex, {}) as {
 			allowRedirects?: boolean;
 			allowInsecureSsl?: boolean;
 			proxies?: boolean;
@@ -945,8 +933,7 @@ export class Browserbase implements INodeType {
 			json: {
 				url,
 				statusCode: response.statusCode as number | undefined,
-				headers:
-					(response.headers as Record<string, string> | undefined) ?? {},
+				headers: (response.headers as Record<string, string> | undefined) ?? {},
 				content: response.content as string | undefined,
 				contentType: response.contentType as string | undefined,
 				encoding: response.encoding as string | undefined,
@@ -963,18 +950,9 @@ export class Browserbase implements INodeType {
 		let url = executeFunctions.getNodeParameter('url', itemIndex) as string;
 		url = normalizeUrl(url);
 
-		const instruction = executeFunctions.getNodeParameter(
-			'instruction',
-			itemIndex,
-		) as string;
-		const modelSource = executeFunctions.getNodeParameter(
-			'modelSource',
-			itemIndex,
-		) as string;
-		const driverModel = executeFunctions.getNodeParameter(
-			'driverModel',
-			itemIndex,
-		) as string;
+		const instruction = executeFunctions.getNodeParameter('instruction', itemIndex) as string;
+		const modelSource = executeFunctions.getNodeParameter('modelSource', itemIndex) as string;
+		const driverModel = executeFunctions.getNodeParameter('driverModel', itemIndex) as string;
 		const mode = executeFunctions.getNodeParameter('mode', itemIndex) as string;
 
 		let agentModel: string;
@@ -983,10 +961,7 @@ export class Browserbase implements INodeType {
 		} else if (mode === 'dom') {
 			agentModel = executeFunctions.getNodeParameter('modelDom', itemIndex) as string;
 		} else {
-			agentModel = executeFunctions.getNodeParameter(
-				'modelHybrid',
-				itemIndex,
-			) as string;
+			agentModel = executeFunctions.getNodeParameter('modelHybrid', itemIndex) as string;
 		}
 
 		if (modelSource === 'userProvidedKey') {
@@ -1000,11 +975,7 @@ export class Browserbase implements INodeType {
 			}
 		}
 
-		const options = executeFunctions.getNodeParameter(
-			'options',
-			itemIndex,
-			{},
-		) as {
+		const options = executeFunctions.getNodeParameter('options', itemIndex, {}) as {
 			maxSteps?: number;
 			systemPrompt?: string;
 			highlightCursor?: boolean;
@@ -1121,19 +1092,12 @@ export class Browserbase implements INodeType {
 				maxSteps: options.maxSteps ?? 20,
 			};
 
-			if (
-				(mode === 'cua' || mode === 'hybrid') &&
-				options.highlightCursor !== false
-			) {
+			if ((mode === 'cua' || mode === 'hybrid') && options.highlightCursor !== false) {
 				executeOptions.highlightCursor = options.highlightCursor ?? true;
 			}
 
 			if (mode === 'dom' || mode === 'hybrid') {
-				const variablesParam = executeFunctions.getNodeParameter(
-					'variables',
-					itemIndex,
-					{},
-				) as {
+				const variablesParam = executeFunctions.getNodeParameter('variables', itemIndex, {}) as {
 					variableValues?: Array<{
 						name: string;
 						value: string;
@@ -1142,8 +1106,7 @@ export class Browserbase implements INodeType {
 				};
 
 				if (variablesParam.variableValues?.length) {
-					const variables: Record<string, { value: string; description?: string }> =
-						{};
+					const variables: Record<string, { value: string; description?: string }> = {};
 					for (const variable of variablesParam.variableValues) {
 						if (variable.name) {
 							variables[variable.name] = variable.description
@@ -1178,10 +1141,9 @@ export class Browserbase implements INodeType {
 				{},
 			);
 
-			const responseData = executeResponse.data as
-				| Record<string, unknown>
-				| undefined;
-			const result = (responseData?.result as Record<string, unknown> | undefined) ?? executeResponse;
+			const responseData = executeResponse.data as Record<string, unknown> | undefined;
+			const result =
+				(responseData?.result as Record<string, unknown> | undefined) ?? executeResponse;
 
 			return {
 				json: {
@@ -1217,6 +1179,7 @@ export class Browserbase implements INodeType {
 	async execute(this: IExecuteFunctions & Browserbase): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
+		const node = new Browserbase();
 
 		for (let i = 0; i < items.length; i++) {
 			try {
@@ -1224,11 +1187,7 @@ export class Browserbase implements INodeType {
 				const modelSource = this.getNodeParameter('modelSource', i, 'gateway') as string;
 				const credentials = await this.getCredentials('browserbaseApi');
 
-				if (
-					resource === 'agent' &&
-					modelSource === 'userProvidedKey' &&
-					!credentials.modelApiKey
-				) {
+				if (resource === 'agent' && modelSource === 'userProvidedKey' && !credentials.modelApiKey) {
 					throw new NodeOperationError(
 						this.getNode(),
 						'Model Source is set to "User-provided API key" but no Model API Key is configured in the Browserbase credentials.',
@@ -1236,16 +1195,15 @@ export class Browserbase implements INodeType {
 				}
 
 				const headers = getHeaders(credentials, {
-					includeModelApiKey:
-						resource === 'agent' && modelSource === 'userProvidedKey',
+					includeModelApiKey: resource === 'agent' && modelSource === 'userProvidedKey',
 				});
 
 				if (resource === 'search') {
-					returnData.push(await this.executeSearch(this, i, headers));
+					returnData.push(await node.executeSearch(this, i, headers));
 				} else if (resource === 'fetch') {
-					returnData.push(await this.executeFetch(this, i, headers));
+					returnData.push(await node.executeFetch(this, i, headers));
 				} else {
-					returnData.push(await this.executeAgent(this, i, headers));
+					returnData.push(await node.executeAgent(this, i, headers));
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
