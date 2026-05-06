@@ -22,7 +22,7 @@ type BrowserOptions = {
 	recordSession?: boolean;
 	solveCaptchas?: boolean;
 	blockAds?: boolean;
-	advancedStealth?: boolean;
+	verified?: boolean;
 	viewportWidth?: number;
 	viewportHeight?: number;
 	logSession?: boolean;
@@ -562,18 +562,11 @@ function buildProperties(): INodeProperties[] {
 					operation: ['execute'],
 				},
 			},
-			options: [
-				{
-					displayName: 'Advanced Stealth',
-					name: 'advancedStealth',
-					type: 'boolean',
-					default: false,
-					description: 'Whether to enable advanced stealth mode to avoid bot detection',
-				},
-				{
-					displayName: 'Block Ads',
-					name: 'blockAds',
-					type: 'boolean',
+				options: [
+					{
+						displayName: 'Block Ads',
+						name: 'blockAds',
+						type: 'boolean',
 					default: true,
 					description: 'Whether to block ads during browsing',
 				},
@@ -591,16 +584,24 @@ function buildProperties(): INodeProperties[] {
 					default: true,
 					description: 'Whether to record the browser session for replay',
 				},
-				{
-					displayName: 'Solve Captchas',
-					name: 'solveCaptchas',
-					type: 'boolean',
-					default: false,
-					description: 'Whether to automatically solve captchas encountered during execution',
-				},
-				{
-					displayName: 'Viewport Height',
-					name: 'viewportHeight',
+					{
+						displayName: 'Solve Captchas',
+						name: 'solveCaptchas',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to automatically solve captchas encountered during execution',
+					},
+					{
+						displayName: 'Verified',
+						name: 'verified',
+						type: 'boolean',
+						default: false,
+						description:
+							'Whether to use a verified browser identity recognized by Browserbase bot protection partners',
+					},
+					{
+						displayName: 'Viewport Height',
+						name: 'viewportHeight',
 					type: 'number',
 					default: 711,
 					description: 'Browser viewport height in pixels (711 recommended for CUA)',
@@ -1026,7 +1027,7 @@ export class Browserbase implements INodeType {
 				recordSession: browserOptions.recordSession ?? true,
 				solveCaptchas: browserOptions.solveCaptchas ?? false,
 				blockAds: browserOptions.blockAds ?? true,
-				advancedStealth: browserOptions.advancedStealth ?? false,
+				verified: browserOptions.verified ?? false,
 				logSession: browserOptions.logSession ?? true,
 				viewport: {
 					width: browserOptions.viewportWidth ?? 1288,
