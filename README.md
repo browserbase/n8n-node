@@ -1,6 +1,10 @@
 # n8n-nodes-browserbase
 
-This is an n8n community node that lets you automate browsers using [Browserbase](https://browserbase.com) powered by [Stagehand](https://stagehand.dev) in your n8n workflows.
+This is an n8n community node for [Browserbase](https://browserbase.com). It gives your workflows three Browserbase capabilities in one node:
+
+1. `Agent`: run Stagehand-powered browser automation
+2. `Search`: find relevant URLs without creating a browser session
+3. `Fetch`: retrieve page content without creating a browser session
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/sustainable-use-license/) workflow automation platform.
 
@@ -11,145 +15,122 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 ## Development / Testing with Docker
 
 ```bash
-# Install dependencies
 npm install
-
-# Build the node
 npm run build
-
-# Run n8n with your node in Docker
 docker-compose up --build
-
-# Open http://localhost:5678 and search for "Browserbase" node
 ```
 
+Open `http://localhost:5678` and search for `Browserbase`.
+
 To rebuild after changes:
+
 ```bash
 npm run build && docker-compose up --build
 ```
 
-## How It Works
+## Capabilities
 
-The Browserbase Agent node is a single, self-contained node that:
-1. Creates a browser session
-2. Navigates to your starting URL
-3. Executes an AI agent to complete your task
-4. Closes the session automatically
+### Agent
 
-Just provide a URL and an instruction - the node handles everything else.
+Use Browserbase browser sessions plus Stagehand to complete browser tasks from a prompt.
 
-## Configuration
-
-### Required Fields
+Required fields:
 
 | Field | Description |
-|-------|-------------|
-| **Starting URL** | The page where the agent begins (e.g., `https://example.com`) |
-| **Instruction** | Natural language task for the agent to complete |
+| --- | --- |
+| `Starting URL` | The page where the agent begins |
+| `Instruction` | Natural language task for the agent to complete |
 
-### Driver Model
+The Agent resource supports:
 
-The driver model powers the browser session (navigation, DOM interactions). Choose from:
+- CUA, DOM, and Hybrid modes
+- Browserbase Model Gateway or your own model API key
+- Session options like region, proxies, context reuse, and keep-alive
+- Variables for DOM and Hybrid flows
 
-- `google/gemini-2.5-flash` (Recommended - fast & cheap)
-- `google/gemini-2.5-pro`
-- `openai/gpt-4o`
-- `openai/gpt-4o-mini`
-- `anthropic/claude-sonnet-4-5-20250929`
+### Search
 
-### Agent Mode
+Use Browserbase Search to find relevant URLs quickly without launching a browser.
 
-| Mode | Description | Best For |
-|------|-------------|----------|
-| **CUA** | Computer Use Agent - uses vision and coordinates | Complex UIs, visual interactions |
-| **DOM** | Uses DOM selectors - works with any LLM | Speed, simple pages |
-| **Hybrid** | Combines both approaches | Fallback reliability |
+Required fields:
 
-### Agent Models
+| Field | Description |
+| --- | --- |
+| `Query` | Search query to execute |
 
-Models available depend on the selected mode:
+Optional fields:
 
-**CUA Mode:**
-- `google/gemini-2.5-computer-use-preview-10-2025`
-- `openai/computer-use-preview`
-- `anthropic/claude-sonnet-4-20250514`
-- `anthropic/claude-sonnet-4-5-20250929`
-- `anthropic/claude-haiku-4-5-20251001`
+| Field | Description |
+| --- | --- |
+| `Number of Results` | How many results to return, from 1 to 25 |
 
-**DOM Mode:**
-- `google/gemini-2.5-flash`
-- `google/gemini-2.5-pro`
-- `openai/gpt-4o`
-- `openai/gpt-4o-mini`
-- `anthropic/claude-sonnet-4-5-20250929`
+Search output includes:
 
-**Hybrid Mode:**
-- `google/gemini-3-flash-preview`
-- `anthropic/claude-sonnet-4-20250514`
-- `anthropic/claude-haiku-4-5-20251001`
+- `requestId`
+- `query`
+- `results`
+- `resultCount`
+
+### Fetch
+
+Use Browserbase Fetch to retrieve raw page content without launching a browser.
+
+Required fields:
+
+| Field | Description |
+| --- | --- |
+| `URL` | URL to fetch |
+
+Optional fetch settings:
+
+- Follow redirects
+- Allow insecure SSL
+- Use Browserbase proxies
+
+Fetch output includes:
+
+- `statusCode`
+- `headers`
+- `content`
+- `contentType`
+- `encoding`
 
 ## Credentials
 
-You need three credentials:
+The node uses one Browserbase credential:
 
 | Credential | Description |
-|------------|-------------|
-| **Browserbase API Key** | Your Browserbase API key |
-| **Browserbase Project ID** | Your Browserbase project ID |
-| **Model API Key** | API key for your chosen model provider |
-
-> **Important:** The Model API Key must match the provider of your models. If using Google models, provide a Google API key. If using OpenAI, provide an OpenAI key.
-
-### Getting Credentials
-
-1. Sign up at [Browserbase](https://browserbase.com)
-2. Navigate to your dashboard for API key and Project ID
-3. Get an API key from your model provider:
-   - [Google AI Studio](https://aistudio.google.com/apikey)
-   - [OpenAI](https://platform.openai.com/api-keys)
-   - [Anthropic](https://console.anthropic.com/)
+| --- | --- |
+| `Browserbase API Key` | Required for all resources |
+| `Browserbase Project ID (Deprecated)` | Optional legacy header |
+| `Model API Key` | Optional. Only needed for Agent when using your own model provider key |
 
 ## Example Usage
 
-**Simple extraction:**
-- URL: `https://news.ycombinator.com`
-- Instruction: `Find the top 3 stories and return their titles and URLs`
+### Search
 
-**Form filling:**
-- URL: `https://example.com/contact`
-- Instruction: `Fill out the contact form with name "John Doe" and email "john@example.com", then submit`
+- Resource: `Search`
+- Query: `browserbase documentation`
 
-**Navigation + action:**
-- URL: `https://github.com`
-- Instruction: `Search for "stagehand" and click on the first repository result`
+### Fetch
 
-## Output
+- Resource: `Fetch`
+- URL: `https://browserbase.com`
 
-The node returns an `AgentResult` object:
+### Agent
 
-```json
-{
-  "success": true,
-  "message": "Task completed successfully",
-  "actions": [
-    { "type": "act", "action": "clicked submit button" }
-  ],
-  "completed": true,
-  "usage": {
-    "input_tokens": 1250,
-    "output_tokens": 340,
-    "inference_time_ms": 2500
-  },
-  "sessionId": "abc-123"
-}
-```
+- Resource: `Agent`
+- Starting URL: `https://github.com`
+- Instruction: `Search for "stagehand" and open the first repository result`
 
 ## Compatibility
 
-Compatible with n8n@1.60.0 or later
+Compatible with n8n `1.60.0` or later.
 
 ## Resources
 
-- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 - [Browserbase Documentation](https://docs.browserbase.com)
+- [Fetch Overview](https://docs.browserbase.com/platform/fetch/overview)
+- [Search Overview](https://docs.browserbase.com/platform/search/overview)
 - [Stagehand Documentation](https://docs.stagehand.dev)
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
