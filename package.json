@@ -13,7 +13,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/browserbase/n8n-node"
+        "url": "git+https://github.com/browserbase/n8n-node.git"
     },
     "scripts": {
         "build": "n8n-node build",
