@@ -1169,6 +1169,7 @@ export class Browserbase implements INodeType {
 						{},
 					);
 				} catch (cleanupError) {
+					// Best-effort session close after an error; ignore cleanup failures.
 					void cleanupError;
 				}
 			}
