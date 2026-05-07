@@ -10,5 +10,5 @@
 			}
 		]
 	},
-	"alias": ["browser", "automation", "web", "scrape", "ai agent", "stagehand"]
+	"alias": ["browser", "automation", "web", "scrape", "ai agent", "stagehand", "search", "fetch"]
 }
