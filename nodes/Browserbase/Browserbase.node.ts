@@ -16,6 +16,7 @@ import {
 
 const STAGEHAND_BASE_URL = 'https://api.stagehand.browserbase.com';
 const API_BASE_URL = 'https://api.browserbase.com';
+const DEFAULT_MAX_STEPS = 40;
 
 // Single source of truth for CUA "Agent Model" options — mirrors Stagehand's
 // AVAILABLE_CUA_MODELS
@@ -447,7 +448,7 @@ function buildProperties(): INodeProperties[] {
 					displayName: 'Max Steps',
 					name: 'maxSteps',
 					type: 'number',
-					default: 20,
+					default: DEFAULT_MAX_STEPS,
 					description: 'Maximum number of steps the agent can take',
 				},
 				{
@@ -709,7 +710,7 @@ function buildProperties(): INodeProperties[] {
 					displayName: 'Max Steps',
 					name: 'maxSteps',
 					type: 'number',
-					default: 20,
+					default: DEFAULT_MAX_STEPS,
 					description: 'Maximum number of steps the agent can take',
 				},
 				{
@@ -1206,7 +1207,7 @@ export class Browserbase implements INodeType {
 			} else {
 				agentModel = modelOptions.modelHybrid || driverModel;
 			}
-			maxSteps = modelOptions.maxSteps ?? 20;
+			maxSteps = modelOptions.maxSteps ?? DEFAULT_MAX_STEPS;
 			systemPrompt = modelOptions.systemPrompt;
 			highlightCursor = modelOptions.highlightCursor ?? true;
 		} else {
@@ -1225,7 +1226,7 @@ export class Browserbase implements INodeType {
 				systemPrompt?: string;
 				highlightCursor?: boolean;
 			};
-			maxSteps = options.maxSteps ?? 20;
+			maxSteps = options.maxSteps ?? DEFAULT_MAX_STEPS;
 			systemPrompt = options.systemPrompt;
 			highlightCursor = options.highlightCursor ?? true;
 		}
