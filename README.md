@@ -63,6 +63,8 @@ Optional fields:
 | Field | Description |
 | --- | --- |
 | `Number of Results` | How many results to return, from 1 to 25 |
+| `Provider` | Optional search provider: `parallel` or `exa`. Omit to use the project default. |
+| `Mode` | Optional Parallel mode: `fast` or `advanced`. Only sent when Provider is Parallel. |
 
 Search output includes:
 
@@ -80,15 +82,21 @@ Required fields:
 | Field | Description |
 | --- | --- |
 | `URL` | URL to fetch |
+| `Format` | `raw` (default), `markdown`, or `json`. Markdown and JSON are Fetch Extract. |
+
+`JSON` format also requires a JSON Schema. The extracted object comes back in `content`.
 
 Optional fetch settings:
 
 - Follow redirects
 - Allow insecure SSL
 - Use Browserbase proxies
+- Proxy country, state, and city (`proxies` is sent as a geolocation object when a country is set)
 
 Fetch output includes:
 
+- `id`
+- `format`
 - `statusCode`
 - `headers`
 - `content`
