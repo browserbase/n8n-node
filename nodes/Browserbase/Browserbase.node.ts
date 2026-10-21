@@ -10,6 +10,7 @@ import {
 	type INodePropertyOptions,
 	type INodeType,
 	type INodeTypeDescription,
+	type IDataObject,
 	type IHttpRequestMethods,
 	NodeOperationError,
 } from 'n8n-workflow';
@@ -17,6 +18,16 @@ import {
 const STAGEHAND_BASE_URL = 'https://api.stagehand.browserbase.com';
 const API_BASE_URL = 'https://api.browserbase.com';
 const DEFAULT_MAX_STEPS = 40;
+const SEARCH_QUERY_MAX_LENGTH = 200;
+
+const FETCH_SCHEMA_EXAMPLE = `{
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "required": ["title"]
+}`;
 
 // Single source of truth for CUA "Agent Model" options — mirrors Stagehand's
 // AVAILABLE_CUA_MODELS
@@ -100,6 +111,27 @@ type SessionOptions = {
 	keepAlive?: boolean;
 	userMetadata?: string;
 };
+
+function readJsonObject(value: unknown): Record<string, unknown> | undefined {
+	if (value == null || value === '') {
+		return undefined;
+	}
+
+	let parsed: unknown = value;
+	if (typeof value === 'string') {
+		const trimmed = value.trim();
+		if (!trimmed) {
+			return undefined;
+		}
+		parsed = JSON.parse(trimmed) as unknown;
+	}
+
+	if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+		return undefined;
+	}
+
+	return parsed as Record<string, unknown>;
+}
 
 function normalizeUrl(url: string): string {
 	if (!url) {
@@ -954,6 +986,65 @@ function buildProperties(): INodeProperties[] {
 			},
 		},
 		{
+			displayName: 'Search Options',
+			name: 'searchOptions',
+			type: 'collection',
+			placeholder: 'Add Option',
+			default: {},
+			displayOptions: {
+				show: {
+					operation: ['search'],
+				},
+			},
+			options: [
+				{
+					displayName: 'Mode',
+					name: 'mode',
+					type: 'options',
+					displayOptions: {
+						show: {
+							provider: ['parallel'],
+						},
+					},
+					options: [
+						{
+							name: 'Advanced',
+							value: 'advanced',
+							description: 'Parallel default mode',
+						},
+						{
+							name: 'Fast',
+							value: 'fast',
+							description: 'Lower-cost Parallel mode',
+						},
+					],
+					default: 'advanced',
+					description:
+						'Parallel search mode. Only sent when Provider is Parallel. Other providers reject mode.',
+				},
+				{
+					displayName: 'Provider',
+					name: 'provider',
+					type: 'options',
+					options: [
+						{
+							name: 'Exa',
+							value: 'exa',
+							description: 'Exa search. Do not set Mode.',
+						},
+						{
+							name: 'Parallel',
+							value: 'parallel',
+							description: 'Parallel search. Supports Fast and Advanced modes.',
+						},
+					],
+					default: 'parallel',
+					description:
+						'Search provider for this request. Leave unset to use the project default.',
+				},
+			],
+		},
+		{
 			displayName: 'URL',
 			name: 'fetchUrl',
 			type: 'string',
@@ -964,6 +1055,53 @@ function buildProperties(): INodeProperties[] {
 			displayOptions: {
 				show: {
 					operation: ['fetch'],
+				},
+			},
+		},
+		{
+			displayName: 'Format',
+			name: 'format',
+			type: 'options',
+			displayOptions: {
+				show: {
+					operation: ['fetch'],
+				},
+			},
+			options: [
+				{
+					name: 'Raw',
+					value: 'raw',
+					description: 'Upstream response body',
+				},
+				{
+					name: 'Markdown',
+					value: 'markdown',
+					description: 'Page converted to markdown. Billed as Fetch Extract.',
+				},
+				{
+					name: 'JSON',
+					value: 'json',
+					description: 'Structured extraction from the JSON Schema. Billed as Fetch Extract.',
+				},
+			],
+			default: 'raw',
+			description:
+				'How content is returned. Raw is the response body. Markdown and JSON are converted first.',
+		},
+		{
+			displayName: 'JSON Schema',
+			name: 'schema',
+			type: 'json',
+			default: FETCH_SCHEMA_EXAMPLE,
+			required: true,
+			typeOptions: {
+				rows: 8,
+			},
+			description: 'JSON Schema for the object returned in content. Required when Format is JSON.',
+			displayOptions: {
+				show: {
+					operation: ['fetch'],
+					format: ['json'],
 				},
 			},
 		},
@@ -994,11 +1132,38 @@ function buildProperties(): INodeProperties[] {
 					description: 'Whether to follow HTTP redirects',
 				},
 				{
+					displayName: 'Proxy City',
+					name: 'proxyCity',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. New York',
+					description:
+						'City for the proxy exit. Requires Proxy Country. Use spaces for multi-word names.',
+				},
+				{
+					displayName: 'Proxy Country',
+					name: 'proxyCountry',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. US',
+					description:
+						'ISO 3166-1 alpha-2 country code. When set, the request is proxied from that country.',
+				},
+				{
+					displayName: 'Proxy State',
+					name: 'proxyState',
+					type: 'string',
+					default: '',
+					placeholder: 'e.g. NY',
+					description: 'US state code. Only valid when Proxy Country is US.',
+				},
+				{
 					displayName: 'Use Proxies',
 					name: 'proxies',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to route the request through Browserbase proxies',
+					description:
+						'Whether to route the request through Browserbase proxies. Ignored when Proxy Country is set.',
 				},
 			],
 		},
@@ -1098,8 +1263,33 @@ export class Browserbase implements INodeType {
 		headers: BrowserbaseHeaders,
 		baseUrl: string,
 	): Promise<INodeExecutionData> {
-		const query = executeFunctions.getNodeParameter('query', itemIndex) as string;
+		const query = (executeFunctions.getNodeParameter('query', itemIndex) as string).trim();
+		if (!query || query.length > SEARCH_QUERY_MAX_LENGTH) {
+			throw new NodeOperationError(
+				executeFunctions.getNode(),
+				`Query must be between 1 and ${SEARCH_QUERY_MAX_LENGTH} characters.`,
+			);
+		}
+
 		const numResults = executeFunctions.getNodeParameter('numResults', itemIndex) as number;
+		const searchOptions = executeFunctions.getNodeParameter('searchOptions', itemIndex, {}) as {
+			provider?: string;
+			mode?: string;
+		};
+
+		const body: Record<string, unknown> = {
+			query,
+			numResults,
+		};
+
+		if (searchOptions.provider) {
+			body.provider = searchOptions.provider;
+		}
+
+		// Mode is only valid for Parallel. Sending it to Exa (or with no provider) returns 400.
+		if (searchOptions.provider === 'parallel' && searchOptions.mode) {
+			body.mode = searchOptions.mode;
+		}
 
 		const response = await this.apiCall(
 			executeFunctions,
@@ -1107,10 +1297,7 @@ export class Browserbase implements INodeType {
 			baseUrl,
 			'/v1/search',
 			headers,
-			{
-				query,
-				numResults,
-			},
+			body,
 		);
 
 		const results = (response.results as Array<Record<string, unknown>> | undefined) ?? [];
@@ -1133,11 +1320,87 @@ export class Browserbase implements INodeType {
 		baseUrl: string,
 	): Promise<INodeExecutionData> {
 		const url = normalizeUrl(executeFunctions.getNodeParameter('fetchUrl', itemIndex) as string);
+		const format = executeFunctions.getNodeParameter('format', itemIndex, 'raw') as string;
 		const fetchOptions = executeFunctions.getNodeParameter('fetchOptions', itemIndex, {}) as {
 			allowRedirects?: boolean;
 			allowInsecureSsl?: boolean;
 			proxies?: boolean;
+			proxyCountry?: string;
+			proxyState?: string;
+			proxyCity?: string;
 		};
+
+		const country = (fetchOptions.proxyCountry ?? '').trim().toUpperCase();
+		const state = (fetchOptions.proxyState ?? '').trim().toUpperCase();
+		const city = (fetchOptions.proxyCity ?? '').trim();
+
+		if ((state || city) && !country) {
+			throw new NodeOperationError(
+				executeFunctions.getNode(),
+				'Proxy Country is required when Proxy State or Proxy City is set.',
+			);
+		}
+
+		if (country && !/^[A-Z]{2}$/.test(country)) {
+			throw new NodeOperationError(
+				executeFunctions.getNode(),
+				'Proxy Country must be a 2-letter ISO country code (for example, US).',
+			);
+		}
+
+		if (state && country !== 'US') {
+			throw new NodeOperationError(
+				executeFunctions.getNode(),
+				'Proxy State is only valid when Proxy Country is US.',
+			);
+		}
+
+		if (state && !/^[A-Z]{2}$/.test(state)) {
+			throw new NodeOperationError(
+				executeFunctions.getNode(),
+				'Proxy State must be a 2-letter US state code (for example, NY).',
+			);
+		}
+
+		let proxies: boolean | { geolocation: Record<string, string> } = fetchOptions.proxies ?? false;
+		if (country) {
+			proxies = {
+				geolocation: {
+					country,
+					...(state ? { state } : {}),
+					...(city ? { city } : {}),
+				},
+			};
+		}
+
+		const body: Record<string, unknown> = {
+			url,
+			allowRedirects: fetchOptions.allowRedirects ?? false,
+			allowInsecureSsl: fetchOptions.allowInsecureSsl ?? false,
+			proxies,
+			format,
+		};
+
+		if (format === 'json') {
+			let schema: Record<string, unknown> | undefined;
+			try {
+				schema = readJsonObject(executeFunctions.getNodeParameter('schema', itemIndex));
+			} catch {
+				throw new NodeOperationError(
+					executeFunctions.getNode(),
+					'JSON Schema must be valid JSON.',
+				);
+			}
+
+			if (!schema) {
+				throw new NodeOperationError(
+					executeFunctions.getNode(),
+					'JSON Schema is required when Format is JSON, and it must be a JSON object.',
+				);
+			}
+
+			body.schema = schema;
+		}
 
 		const response = await this.apiCall(
 			executeFunctions,
@@ -1145,20 +1408,17 @@ export class Browserbase implements INodeType {
 			baseUrl,
 			'/v1/fetch',
 			headers,
-			{
-				url,
-				allowRedirects: fetchOptions.allowRedirects ?? false,
-				allowInsecureSsl: fetchOptions.allowInsecureSsl ?? false,
-				proxies: fetchOptions.proxies ?? false,
-			},
+			body,
 		);
 
 		return {
 			json: {
+				id: response.id as string | undefined,
 				url,
+				format,
 				statusCode: response.statusCode as number | undefined,
 				headers: (response.headers as Record<string, string> | undefined) ?? {},
-				content: response.content as string | undefined,
+				content: response.content as IDataObject | string | undefined,
 				contentType: response.contentType as string | undefined,
 				encoding: response.encoding as string | undefined,
 			},
